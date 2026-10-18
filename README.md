@@ -10,5 +10,6 @@ My notes and implementations while learning Data Structures & Algorithms in Pyth
 - [Doubly Linked Lists](./04-doubly-linked-lists.md)
 - [Stacks](./05-stacks.md)
 - [Queues](./06-queues.md)
+- [Binary Search Trees](./08-binary-search-trees.md)
 
 The notes are based on my DSA study in Python and focus on understanding concepts, reference logic, implementations, edge cases, and Big-O complexity.
