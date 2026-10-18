@@ -174,3 +174,133 @@ A BST is not automatically balanced. Inserting sorted values can create a chain 
 - **Runtime:** O(height), not automatically O(log n).
 
 > A BST turns each comparison into a direction. Its efficiency depends on its height.
+
+
+---
+
+## Recursive BST Methods: Contains, Insert, and Delete
+
+Every subtree is itself a BST. Each recursive call handles the current subtree, chooses the relevant child, and returns a result. For this implementation, duplicate insertions are ignored.
+
+### Recursive contains
+
+Return a boolean. An empty subtree means the value is absent; a matching node means it is present.
+
+```python
+def contains(self, value):
+    def search(node):
+        if node is None:
+            return False
+        if value == node.value:
+            return True
+        if value < node.value:
+            return search(node.left)
+        return search(node.right)
+
+    return search(self.root)
+```
+
+Trace searching for 12 in a tree containing 10 → right to 15 → left to 12. The result True returns through the waiting calls. Always return the recursive result; otherwise it is discarded.
+
+### Recursive insert
+
+The helper returns the root of the updated subtree. If the subtree is empty, create the new node. Otherwise recurse left or right, reconnect the returned subtree, and return the current node.
+
+```python
+def insert(self, value):
+    def add(node):
+        if node is None:
+            return Node(value)
+        if value < node.value:
+            node.left = add(node.left)
+        elif value > node.value:
+            node.right = add(node.right)
+        # Equal values are ignored.
+        return node
+
+    self.root = add(self.root)
+```
+
+The assignment to self.root handles insertion into an empty tree. Assignments to node.left/node.right reconnect the updated child subtree.
+
+### Recursive delete
+
+Deletion has three cases: a leaf returns None; a node with one child returns that child; a node with two children is replaced by its in-order successor (the smallest node in the right subtree), then the original successor is deleted.
+
+```python
+def delete(self, value):
+    def remove(node, value):
+        if node is None:
+            return None
+
+        if value < node.value:
+            node.left = remove(node.left, value)
+            return node
+        if value > node.value:
+            node.right = remove(node.right, value)
+            return node
+
+        # Target found: leaf or one-child case.
+        if node.left is None:
+            return node.right
+        if node.right is None:
+            return node.left
+
+        # Two children: find the in-order successor.
+        successor = node.right
+        while successor.left is not None:
+            successor = successor.left
+
+        node.value = successor.value
+        node.right = remove(node.right, successor.value)
+        return node
+
+    self.root = remove(self.root, value)
+```
+
+The two child checks also handle a leaf: when both children are None, the first check returns None. If the target does not exist, the search reaches None and the tree remains unchanged. Assigning the returned root to self.root correctly handles deletion of the root.
+
+### Why returning subtree roots matters
+
+```python
+node.left = add(node.left)
+node.right = add(node.right)
+node.left = remove(node.left, value)
+node.right = remove(node.right, value)
+self.root = remove(self.root, value)
+```
+
+Recursive insert/delete can return a different subtree root after creating a node or deleting a node with zero or one child. The caller must reconnect that returned root. Recursive contains instead returns True/False and does not modify links.
+
+### Call-stack mental model
+
+Calls descend one level at a time until they reach an empty child or the target. During unwinding, insert/delete reconnect child references and return the current subtree root to the parent.
+
+- **Contains:** return a boolean.
+- **Insert:** empty subtree → create node; otherwise recurse, reconnect, return node.
+- **Delete leaf:** return None.
+- **Delete one-child node:** return its child.
+- **Delete two-child node:** copy successor value, then remove the original successor.
+
+### Complexity
+
+Let h be tree height and n be the number of nodes.
+
+| Method | Time | Auxiliary call-stack space |
+|---|---|---|
+| Recursive contains | O(h) | O(h) |
+| Recursive insert | O(h) | O(h) |
+| Recursive delete | O(h) | O(h) |
+
+For a balanced BST, h = O(log n). For a skewed BST, h = O(n), and sufficiently deep recursion can hit Python's recursion limit.
+
+### Practice
+
+Using a BST with root 8, children 3 and 10, and further values 1, 6, 14, 4, 7, 13:
+1. Trace contains(7) and contains(5).
+2. Insert 5 and identify the child reference that changes.
+3. Delete leaf 1.
+4. Delete 6 and identify the replacement child.
+5. Delete 3; find its successor and draw the resulting tree.
+
+For each operation, identify its base case, recursive case, return value, and any references that must be reconnected.
