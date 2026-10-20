@@ -79,8 +79,8 @@ To insert into a min-heap:
 Example: insert `3` into `[2, 5, 4, 9, 7, 6]`.
 
 - Append `3`: `[2, 5, 4, 9, 7, 6, 3]`.
-- Its parent is `4), so swap: `[2, 5, 3, 9, 7, 6, 4]`.
-- Now `3)'s parent is `2), and `2 <= 3), so stop.
+- Its parent is `4`, so swap: `[2, 5, 3, 9, 7, 6, 4]`.
+- Now `3`'s parent is `2`, and `2 <= 3`, so stop.
 
 Worst-case time: `O(log n)`.
 
@@ -95,7 +95,7 @@ For a min-heap, popping removes the minimum:
 5. Continue until the heap property holds.
 6. Return the saved minimum.
 
-For a max-heap, choose the larger child when sifting down. Worst-case time is `O(log n)).
+For a max-heap, choose the larger child when sifting down. Worst-case time is `O(log n)`.
 
 ## 7. Python's `heapq` Module
 
@@ -267,7 +267,7 @@ Use a heap when you repeatedly need the minimum or maximum, rather than keeping 
 | Root | Minimum or maximum | Depends on the tree and ordering |
 | Ordering | Parent-child property | Left subtree values are smaller; right subtree values are larger (for a standard unique-key BST) |
 | Peek min/max | `O(1)` at the appropriate root | `O(h)`, where h is tree height |
-| Insert/remove | `O(log n)` for a binary heap | `O(h)`; balanced trees are `O(log n)), unbalanced can be `O(n)` |
+| Insert/remove | `O(log n)` for a binary heap | `O(h)`; balanced trees are `O(log n)`, unbalanced can be `O(n)` |
 | Search arbitrary key | `O(n)` | `O(h)` |
 | Best use | Repeated priority access | Ordered search, predecessor/successor, range queries |
 
@@ -280,7 +280,7 @@ A heap cannot guide an arbitrary search by comparing a target with one child, un
 - Forgetting that array indices start at zero.
 - Calling `peek` or `pop` on an empty heap without handling the case.
 - Assuming arbitrary search is `O(log n)`; it is generally `O(n)`.
-- Assuming `heapify` is `O(n log n)); bottom-up heap construction is `O(n)`.
+- Assuming `heapify` is `O(n log n)`; bottom-up heap construction is `O(n)`.
 - Using tuples with unorderable task objects when priorities tie.
 - Assuming a heap is stable; equal-priority values are not automatically returned in insertion order.
 
