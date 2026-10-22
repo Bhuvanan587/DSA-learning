@@ -13,5 +13,6 @@ My notes and implementations while learning Data Structures & Algorithms in Pyth
 - [Binary Search Trees](./08-binary-search-trees.md)
 - [Heaps](./11-heaps.md)
 - [Tree Traversal](./12-tree-traversal.md)
+- [Sorting Algorithms: Bubble, Selection, and Insertion Sort](./13-sorting-algorithms.md)
 
 The notes are based on my DSA study in Python and focus on understanding concepts, reference logic, implementations, edge cases, and Big-O complexity.
