@@ -14,5 +14,6 @@ My notes and implementations while learning Data Structures & Algorithms in Pyth
 - [Heaps](./11-heaps.md)
 - [Tree Traversal](./12-tree-traversal.md)
 - [Sorting Algorithms: Bubble, Selection, and Insertion Sort](./13-sorting-algorithms.md)
+- [Recursion, Call Stack & Factorial](./14-recursion-call-stack-factorial.md)
 
 The notes are based on my DSA study in Python and focus on understanding concepts, reference logic, implementations, edge cases, and Big-O complexity.
