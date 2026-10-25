@@ -16,5 +16,6 @@ My notes and implementations while learning Data Structures & Algorithms in Pyth
 - [Sorting Algorithms: Bubble, Selection, and Insertion Sort](./13-sorting-algorithms.md)
 - [Recursion, Call Stack & Factorial](./14-recursion-call-stack-factorial.md)
 - [Quick Sort](./15-quick-sort.md)
+- [Dynamic Programming](./16-dynamic-programming.md)
 
 The notes are based on my DSA study in Python and focus on understanding concepts, reference logic, implementations, edge cases, and Big-O complexity.
