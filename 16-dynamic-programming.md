@@ -366,3 +366,271 @@ Try these in order. For each, define the state and recurrence before writing cod
 - Count distinct states and work per state to analyze time.
 - Optimize space only when dependencies allow it.
 - The hardest part is usually finding the right state and transition—not writing the loop.
+
+---
+
+## 14. Worked pattern: Grid DP
+
+**Problem:** Count paths from the top-left to the bottom-right of a grid, moving only right or down.
+
+Let `dp[r][c]` be the number of ways to reach cell `(r, c)`.
+
+For an ordinary grid:
+- The first row has one way to reach each cell: move right along the row.
+- The first column has one way to reach each cell: move down the column.
+- Every other cell can be reached from above or from the left.
+
+```py
+def unique_paths(rows, cols):
+    dp = [[1] * cols for _ in range(rows)]
+
+    for r in range(1, rows):
+        for c in range(1, cols):
+            dp[r][c] = dp[r - 1][c] + dp[r][c - 1]
+
+    return dp[rows - 1][cols - 1]
+```
+
+- **Time:** O(rows × cols)
+- **Space:** O(rows × cols)
+
+A one-row optimization is possible because each cell only needs the value from above and the updated value to its left:
+
+```py
+def unique_paths(rows, cols):
+    dp = [1] * cols
+
+    for _ in range(1, rows):
+        for c in range(1, cols):
+            dp[c] += dp[c - 1]
+
+    return dp[-1]
+```
+
+- **Extra space:** O(cols)
+
+For grids with obstacles, initialize blocked cells to zero and never add paths through a blocked cell. Check empty dimensions if the function's input contract permits them.
+
+## 15. Worked pattern: 0/1 Knapsack
+
+**Problem:** Each item has a weight and value. Choose items to maximize total value without exceeding capacity. Each item can be chosen at most once.
+
+Define `dp[i][cap]` as the best value using the first `i` items with capacity `cap`.
+
+For item `i - 1`, either:
+- Skip it: `dp[i - 1][cap]`
+- Take it, if it fits: `values[i - 1] + dp[i - 1][cap - weights[i - 1]]`
+
+```py
+def knapsack(weights, values, capacity):
+    n = len(weights)
+    dp = [[0] * (capacity + 1) for _ in range(n + 1)]
+
+    for i in range(1, n + 1):
+        weight = weights[i - 1]
+        value = values[i - 1]
+
+        for cap in range(capacity + 1):
+            dp[i][cap] = dp[i - 1][cap]
+
+            if weight <= cap:
+                dp[i][cap] = max(
+                    dp[i][cap],
+                    value + dp[i - 1][cap - weight]
+                )
+
+    return dp[n][capacity]
+```
+
+- **Time:** O(n × capacity)
+- **Space:** O(n × capacity)
+
+**Space optimization:** use one array, but iterate capacity backwards. This prevents the current item from being reused in the same pass.
+
+```py
+def knapsack(weights, values, capacity):
+    dp = [0] * (capacity + 1)
+
+    for weight, value in zip(weights, values):
+        for cap in range(capacity, weight - 1, -1):
+            dp[cap] = max(dp[cap], value + dp[cap - weight])
+
+    return dp[capacity]
+```
+
+- **Extra space:** O(capacity)
+
+This algorithm is pseudo-polynomial: its complexity depends on the numeric capacity, not just the number of input items. It is practical only when capacity is reasonably small.
+
+## 16. Worked pattern: Subset Sum
+
+**Problem:** Determine whether any subset of positive integers adds up to a target.
+
+Define `dp[s]` as whether a sum of `s` is possible. Initially, only sum zero is possible: `dp[0] = True`.
+
+For each number, update reachable sums **backwards** so that the same number is not used more than once.
+
+```py
+def can_make_sum(nums, target):
+    dp = [False] * (target + 1)
+    dp[0] = True
+
+    for num in nums:
+        for total in range(target, num - 1, -1):
+            dp[total] = dp[total] or dp[total - num]
+
+    return dp[target]
+```
+
+- **Time:** O(n × target)
+- **Space:** O(target)
+
+This is also useful for **Equal Subset Partition**: if the total sum is odd, equal partition is impossible; otherwise, check whether a subset sums to half the total. The positive-number assumption matters for this implementation.
+
+## 17. Worked pattern: Longest Common Subsequence (LCS)
+
+**Problem:** Find the length of the longest sequence appearing in both strings in the same order. Characters do not need to be adjacent.
+
+Let `dp[i][j]` be the LCS length for the first `i` characters of string `a` and first `j` characters of string `b`.
+
+- If the last characters match, add one to the diagonal subproblem.
+- Otherwise, drop one character from either prefix and take the larger result.
+
+```py
+def lcs(a, b):
+    dp = [[0] * (len(b) + 1) for _ in range(len(a) + 1)]
+
+    for i in range(1, len(a) + 1):
+        for j in range(1, len(b) + 1):
+            if a[i - 1] == b[j - 1]:
+                dp[i][j] = 1 + dp[i - 1][j - 1]
+            else:
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+
+    return dp[len(a)][len(b)]
+```
+
+- **Time:** O(len(a) × len(b))
+- **Space:** O(len(a) × len(b))
+
+The extra row and column represent empty prefixes, whose LCS length is zero. This makes the base cases and indexing straightforward.
+
+## 18. Worked pattern: Edit Distance
+
+**Problem:** Find the minimum number of insertions, deletions, and replacements needed to transform one string into another.
+
+Let `dp[i][j]` be the minimum operations needed to transform the first `i` characters of `a` into the first `j` characters of `b`.
+
+Base cases:
+- Transforming a prefix of length `i` into an empty string takes `i` deletions.
+- Transforming an empty string into a prefix of length `j` takes `j` insertions.
+
+If the current characters match, no new operation is needed. Otherwise, choose the cheapest of delete, insert, or replace.
+
+```py
+def edit_distance(a, b):
+    m, n = len(a), len(b)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+
+    for i in range(m + 1):
+        dp[i][0] = i
+    for j in range(n + 1):
+        dp[0][j] = j
+
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if a[i - 1] == b[j - 1]:
+                dp[i][j] = dp[i - 1][j - 1]
+            else:
+                dp[i][j] = 1 + min(
+                    dp[i - 1][j],      # delete
+                    dp[i][j - 1],      # insert
+                    dp[i - 1][j - 1]   # replace
+                )
+
+    return dp[m][n]
+```
+
+- **Time:** O(m × n)
+- **Space:** O(m × n)
+
+## 19. Worked pattern: Longest Increasing Subsequence (LIS)
+
+**Problem:** Find the length of the longest strictly increasing subsequence. The selected elements keep their original order, but do not need to be adjacent.
+
+A direct O(n²) DP definition is: `dp[i]` is the length of the longest increasing subsequence ending at index `i`.
+
+```py
+def lis(nums):
+    if not nums:
+        return 0
+
+    dp = [1] * len(nums)
+
+    for i in range(len(nums)):
+        for j in range(i):
+            if nums[j] < nums[i]:
+                dp[i] = max(dp[i], dp[j] + 1)
+
+    return max(dp)
+```
+
+- **Time:** O(n²)
+- **Space:** O(n)
+
+This is a useful beginner implementation because the state has a clear meaning. There is also an O(n log n) approach using binary search and a tails array, but that array is not itself necessarily the actual subsequence. Learn the O(n²) recurrence first.
+
+## 20. Reconstructing an actual solution
+
+Many DP questions ask for the best value or length, but others ask you to return the choices that produced it. The final DP value alone may not reveal those choices.
+
+A common method:
+1. Store enough decisions or predecessor information while filling the table.
+2. Start from the final state.
+3. Follow the stored decisions backwards.
+4. Reverse the collected choices if they were discovered in reverse order.
+
+For example, to reconstruct a knapsack selection, store whether each state took or skipped an item, then walk backwards through the item and capacity dimensions. Alternatively, compare neighboring DP states to infer a choice when the recurrence allows it. Be careful with ties: multiple optimal solutions may exist.
+
+## 21. Choosing between DP and other approaches
+
+DP is a strong candidate when the problem can be expressed as a manageable set of states and transitions. But do not force it:
+
+- **Greedy:** can work when a locally best choice can be proved to lead to a global optimum.
+- **Graph algorithms:** shortest paths and reachability may be more naturally expressed as graph search; some graph problems also use DP.
+- **Backtracking:** explores choices and is useful when constraints are small; memoization can help when many branches reach the same state.
+- **Divide and conquer:** splits into mostly independent subproblems rather than repeatedly solving the same states.
+
+A recurrence alone does not prove that a DP solution is correct. Explain why its cases cover every valid solution and why the chosen minimum or maximum is valid.
+
+## 22. More practice, grouped by pattern
+
+### 1D and decisions
+- Min Cost Climbing Stairs
+- House Robber II (circular arrangement)
+- Decode Ways
+- Word Break
+
+### Grid and paths
+- Unique Paths with Obstacles
+- Minimum Path Sum
+- Triangle Minimum Path Sum
+
+### Knapsack and subsets
+- Partition Equal Subset Sum
+- Target Sum
+- Coin Change II (count combinations)
+- Unbounded Knapsack
+
+### Strings and subsequences
+- Longest Common Subsequence
+- Edit Distance
+- Longest Increasing Subsequence
+- Longest Palindromic Subsequence
+
+### Advanced patterns
+- Matrix Chain Multiplication (interval DP)
+- Stock Buy/Sell with transaction constraints (state-machine DP)
+- Longest Path in a Directed Acyclic Graph (DAG DP)
+
+For each practice problem, write the state in plain English, derive the transition, justify the base cases, identify the answer state, and calculate time and space complexity before coding.
